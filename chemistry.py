@@ -1,4 +1,9 @@
-class Element(object):
+import abc
+
+class Element(metaclass=abc.ABCMeta):
+    pass
+
+class Atom(object):
     def __init__(self, options):
         props = {
             "number"            : int,
@@ -37,7 +42,8 @@ class Element(object):
 
     __str__ = __repr__
     
-    
+Element.register(Atom)
+
 import xml.etree.cElementTree as ET
 
 tree = ET.ElementTree(file="bodr-10/elements/elements.xml")
@@ -75,5 +81,4 @@ for element in root[2:]:
         else:
             properties[key[0]] = property.attrib[key[1]]
     
-    globals()[properties["symbol"]] = Element(properties)
-
+    globals()[properties["symbol"]] = Atom(properties)
