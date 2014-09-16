@@ -82,3 +82,11 @@ for element in root[2:]:
             properties[key[0]] = property.attrib[key[1]]
     
     globals()[properties["symbol"]] = Atom(properties)
+
+# cleanup namespace
+del root
+del tree
+del keymap
+del element
+del property
+del properties
