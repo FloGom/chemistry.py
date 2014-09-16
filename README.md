@@ -1,4 +1,4 @@
 chemistry.py
 ============
 
-A module that adds symbolic chemistry to Python/SAGEmath. 
+A module that adds symbolic chemistry to Python/SAGEmath. Major WIP.
