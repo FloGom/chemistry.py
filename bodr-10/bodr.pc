@@ -1,0 +1,12 @@
+prefix=/usr/local
+datarootdir=${prefix}/share
+datadir=${datarootdir}
+pkgdatadir=${datarootdir}/bodr
+
+Name: bodr
+Description: Blue Obelisk Data Repository
+URL: http://bodr.sf.net
+Version: 10
+Requires:
+Libs:
+Cflags:
