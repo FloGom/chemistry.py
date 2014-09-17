@@ -340,30 +340,31 @@ class Formula(object):
     def electron_config_full(self):
         return self._map_collect("electron_config_full")
     
-    def __getattr__(self, attr):
+    @property    
+    def counts(self):
+        counts = collections.defaultdict(lambda: 0)
         
-        attrmap = {
-            "mass"                 : (self.mass_,                   {"map" : False}),
-            "exact_mass"           : (self.exact_mass_,             {"map" : False}),
-            "number"               : (self.number_,                 {}),
-            "symbol"               : (self.symbol_,                 {}),
-            "name"                 : (self.name_,                   {}),
-            "ionization"           : (self.ionization_,             {}),
-            "electron_affinity"    : (self.electron_affinity_,      {}),
-            "electronegativity"    : (self.electronegativity_,      {}),
-            "radius_vdw"           : (self.radius_vdw_,             {}),
-            "radius_covalent"      : (self.radius_covalent_,        {}),
-            "boiling_point"        : (self.boiling_point_,          {}),
-            "melting_point"        : (self.melting_point_,          {}),
-            "block"                : (self.block_,                  {}),
-            "period"               : (self.period_,                 {}),
-            "group"                : (self.group_,                  {}),
-            "family"               : (self.family_,                 {}),
-            "electron_config"      : (self.electron_config_,        {}),
-            "electron_config_full" : (self.electron_config_full_,   {}),
-        }
-        try:
-            attr = attrmap[attr]
-        except:
-            raise AttributeError("No such attribute "+attr)
-        return attr[0](*attr[1:-1], **attr[-1])
+        for symbol in self.symbols:
+            if hasattr(symbol, "counts"):
+                atoms = symbol.counts
+                for item in atoms:
+                    counts[item] += atoms[item] 
+            else:
+                counts[symbol] += 1
+                
+        for item in counts:
+            counts[item] *= self.count
+
+        return dict(counts)
+        
+    @property    
+    def mass_composition(self):
+        counts = self.counts
+        for atom in counts:
+            counts[atom] *= atom.mass
+
+        total = reduce(lambda x,y:x+y,counts.values())
+        for atom in counts:
+            counts[atom] *= 100/total
+
+        return counts
