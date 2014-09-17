@@ -47,6 +47,27 @@ class Atom(object):
         return self.symbol
 
     __str__ = __repr__
+
+    def electron_config_full_(self):
+        def feconfig(atom):
+            config = atom.electron_config
+            config = config.split(" ")
+            if len(config) == 1:
+                return config[0]
+            return " ".join([feconfig(Lookup.symbol[config[0]])] + list(config[1:]))
+            
+        return feconfig(self)
+            
+    def __getattr__(self, attr):
+
+        attrmap = {
+            "electron_config_full" : (self.electron_config_full_,   {}),
+        }
+        try:
+            attr = attrmap[attr]
+        except:
+            raise AttributeError("No such attribute "+attr)
+        return attr[0](*attr[1:-1], **attr[-1])
     
 Element.register(Atom)
 
@@ -302,28 +323,33 @@ class Formula(object):
     def electron_config_(self):
         return self._map_collect("electron_config")
 
+    def electron_config_full_(self):
+        return self._map_collect("electron_config_full")
     
     def __getattr__(self, attr):
         
         attrmap = {
-            "mass"              : (self.mass_,              {"map" : False}),
-            "exact_mass"        : (self.exact_mass_,        {"map" : False}),
-            "number"            : (self.number_,            {}),
-            "symbol"            : (self.symbol_,            {}),
-            "name"              : (self.name_,              {}),
-            "ionization"        : (self.ionization_,        {}),
-            "electron_affinity" : (self.electron_affinity_, {}),
-            "electronegativity" : (self.electronegativity_, {}),
-            "radius_vdw"        : (self.radius_vdw_,        {}),
-            "radius_covalent"   : (self.radius_covalent_,   {}),
-            "boiling_point"     : (self.boiling_point_,     {}),
-            "melting_point"     : (self.melting_point_,     {}),
-            "block"             : (self.block_,             {}),
-            "period"            : (self.period_,            {}),
-            "group"             : (self.group_,             {}),
-            "family"            : (self.family_,            {}),
-            "electron_config"   : (self.electron_config_,   {}),
+            "mass"                 : (self.mass_,                   {"map" : False}),
+            "exact_mass"           : (self.exact_mass_,             {"map" : False}),
+            "number"               : (self.number_,                 {}),
+            "symbol"               : (self.symbol_,                 {}),
+            "name"                 : (self.name_,                   {}),
+            "ionization"           : (self.ionization_,             {}),
+            "electron_affinity"    : (self.electron_affinity_,      {}),
+            "electronegativity"    : (self.electronegativity_,      {}),
+            "radius_vdw"           : (self.radius_vdw_,             {}),
+            "radius_covalent"      : (self.radius_covalent_,        {}),
+            "boiling_point"        : (self.boiling_point_,          {}),
+            "melting_point"        : (self.melting_point_,          {}),
+            "block"                : (self.block_,                  {}),
+            "period"               : (self.period_,                 {}),
+            "group"                : (self.group_,                  {}),
+            "family"               : (self.family_,                 {}),
+            "electron_config"      : (self.electron_config_,        {}),
+            "electron_config_full" : (self.electron_config_full_,   {}),
         }
-        
-        attr = attrmap[attr]
+        try:
+            attr = attrmap[attr]
+        except:
+            raise AttributeError("No such attribute "+attr)
         return attr[0](*attr[1:-1], **attr[-1])
