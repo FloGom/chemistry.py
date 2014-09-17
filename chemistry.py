@@ -47,8 +47,9 @@ class Atom(object):
         return self.symbol
 
     __str__ = __repr__
-
-    def electron_config_full_(self):
+    
+    @property
+    def electron_config_full(self):
         def feconfig(atom):
             config = atom.electron_config
             config = config.split(" ")
@@ -58,17 +59,6 @@ class Atom(object):
             
         return feconfig(self)
             
-    def __getattr__(self, attr):
-
-        attrmap = {
-            "electron_config_full" : (self.electron_config_full_,   {}),
-        }
-        try:
-            attr = attrmap[attr]
-        except:
-            raise AttributeError("No such attribute "+attr)
-        return attr[0](*attr[1:-1], **attr[-1])
-    
 Element.register(Atom)
 
 class Lookup(object):
@@ -256,7 +246,7 @@ class Formula(object):
             result[atom] = getattr(atom, property)
         return result
         
-    def mass_(self, **kwargs):
+    def masses(self, **kwargs):
         if "map" in kwargs and not kwargs["map"]:
             mass = reduce(lambda x,y:x+y, self._map("mass", **kwargs))
             return round(mass * self.count, 6)
@@ -267,7 +257,7 @@ class Formula(object):
             
         return masses
         
-    def exact_mass_(self, **kwargs):
+    def exact_masses(self, **kwargs):
         if "map" in kwargs and not kwargs["map"]:
             mass = reduce(lambda x,y:x+y, self._map("exact_mass", **kwargs))
             return mass * self.count
@@ -278,52 +268,76 @@ class Formula(object):
             
         return masses
             
-    def number_(self):
+    @property
+    def mass(self):
+        return self.masses(map=False)
+
+    @property
+    def exact_mass(self):
+        return self.exact_masses(map=False)
+        
+    @property
+    def number(self):
         return self._map_collect("number")
-
-    def symbol_(self):
+        
+    @property    
+    def symbol(self):
         return self._map_collect("symbol")
-
-    def name_(self):
+        
+    @property    
+    def name(self):
         return self._map_collect("name")
-
-    def ionization_(self):
+        
+    @property    
+    def ionization(self):
         return self._map_collect("ionization")
-
-    def electron_affinity_(self):
+        
+    @property    
+    def electron_affinity(self):
         return self._map_collect("electron_affinity")
-
-    def electronegativity_(self):
+        
+    @property    
+    def electronegativity(self):
         return self._map_collect("electronegativity")
-
-    def radius_vdw_(self):
+        
+    @property    
+    def radius_vdw(self):
         return self._map_collect("radius_vdw")
-
-    def radius_covalent_(self):
+        
+    @property    
+    def radius_covalent(self):
         return self._map_collect("radius_covalent")
-
-    def boiling_point_(self):
+        
+    @property    
+    def boiling_point(self):
         return self._map_collect("boiling_point")
-
-    def melting_point_(self):
+        
+    @property    
+    def melting_point(self):
         return self._map_collect("melting_point")
-
-    def block_(self):
+        
+    @property    
+    def block(self):
         return self._map_collect("block")
-
-    def period_(self):
+        
+    @property
+    def period(self):
         return self._map_collect("period")
-
-    def group_(self):
+        
+    @property
+    def group(self):
         return self._map_collect("group")
-
-    def family_(self):
+        
+    @property    
+    def family(self):
         return self._map_collect("family")
-
-    def electron_config_(self):
+        
+    @property    
+    def electron_config(self):
         return self._map_collect("electron_config")
-
-    def electron_config_full_(self):
+        
+    @property    
+    def electron_config_full(self):
         return self._map_collect("electron_config_full")
     
     def __getattr__(self, attr):
