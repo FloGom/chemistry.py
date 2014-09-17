@@ -1,12 +1,14 @@
 import abc
 import collections
 import string
+from functools import reduce
+import functools
 
 class Element(metaclass=abc.ABCMeta):
     pass
 
 class Atom(object):
-    def __init__(self, options):
+    def __init__(self, options, **kwargs):
         props = {
             "number"            : int,
             "symbol"            : str,
@@ -26,6 +28,8 @@ class Atom(object):
             "family"            : str,
             "electron_config"   : str
         }
+
+        props.update(kwargs)
         
         for prop in options:
             if prop not in props:
@@ -112,8 +116,8 @@ build_table()
 class Formula(object):
     def __init__(self, symbols, count=1, charge=0):
         # print("push "+symbols)
-        self.count   = count
-        self.charge  = charge
+        self.count   = int(count)
+        self.charge  = int(charge)
         self.symbols = []
         
         if isinstance(symbols, str):
@@ -203,4 +207,123 @@ class Formula(object):
         return "".join(string)
         
     __repr__ = __str__
+
+    def _map(self, property, *args, **kwargs):
+        results = []
+        for symbol in self.symbols:
+            attr = getattr(symbol, property)
+            if hasattr(symbol, property+"_"):
+                results.append(getattr(symbol,property+"_")(*args, **kwargs))
+            else:
+                results.append(attr)
+                
+        return results
+
+    def _collect(self):
+        atoms = set()
+        for symbol in self.symbols:
+            if hasattr(symbol, "_collect"):
+                atoms |= symbol._collect()
+            else:
+                atoms.add(symbol)
+
+        return atoms
+
+    def _map_collect(self, property):
+        result = {}
+        for atom in self._collect():
+            result[atom] = getattr(atom, property)
+        return result
         
+    def mass_(self, **kwargs):
+        if "map" in kwargs and not kwargs["map"]:
+            mass = reduce(lambda x,y:x+y, self._map("mass", **kwargs))
+            return round(mass * self.count, 6)
+
+        masses = {}
+        for atom in self._collect():
+            masses[atom] = atom.mass
+            
+        return masses
+        
+    def exact_mass_(self, **kwargs):
+        if "map" in kwargs and not kwargs["map"]:
+            mass = reduce(lambda x,y:x+y, self._map("exact_mass", **kwargs))
+            return mass * self.count
+
+        masses = {}
+        for atom in self._collect():
+            masses[atom] = atom.exact_mass
+            
+        return masses
+            
+    def number_(self):
+        return self._map_collect("number")
+
+    def symbol_(self):
+        return self._map_collect("symbol")
+
+    def name_(self):
+        return self._map_collect("name")
+
+    def ionization_(self):
+        return self._map_collect("ionization")
+
+    def electron_affinity_(self):
+        return self._map_collect("electron_affinity")
+
+    def electronegativity_(self):
+        return self._map_collect("electronegativity")
+
+    def radius_vdw_(self):
+        return self._map_collect("radius_vdw")
+
+    def radius_covalent_(self):
+        return self._map_collect("radius_covalent")
+
+    def boiling_point_(self):
+        return self._map_collect("boiling_point")
+
+    def melting_point_(self):
+        return self._map_collect("melting_point")
+
+    def block_(self):
+        return self._map_collect("block")
+
+    def period_(self):
+        return self._map_collect("period")
+
+    def group_(self):
+        return self._map_collect("group")
+
+    def family_(self):
+        return self._map_collect("family")
+
+    def electron_config_(self):
+        return self._map_collect("electron_config")
+
+    
+    def __getattr__(self, attr):
+        
+        attrmap = {
+            "mass"              : (self.mass_,              {"map" : False}),
+            "exact_mass"        : (self.exact_mass_,        {"map" : False}),
+            "number"            : (self.number_,            {}),
+            "symbol"            : (self.symbol_,            {}),
+            "name"              : (self.name_,              {}),
+            "ionization"        : (self.ionization_,        {}),
+            "electron_affinity" : (self.electron_affinity_, {}),
+            "electronegativity" : (self.electronegativity_, {}),
+            "radius_vdw"        : (self.radius_vdw_,        {}),
+            "radius_covalent"   : (self.radius_covalent_,   {}),
+            "boiling_point"     : (self.boiling_point_,     {}),
+            "melting_point"     : (self.melting_point_,     {}),
+            "block"             : (self.block_,             {}),
+            "period"            : (self.period_,            {}),
+            "group"             : (self.group_,             {}),
+            "family"            : (self.family_,            {}),
+            "electron_config"   : (self.electron_config_,   {}),
+        }
+        
+        attr = attrmap[attr]
+        return attr[0](*attr[1:-1], **attr[-1])
