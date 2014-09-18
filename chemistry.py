@@ -164,7 +164,7 @@ class Formula(object):
                     # print("digit")
                     multiplier += char
                    
-                elif openparens == 0:
+                elif openparens == 0 and char in string.ascii_uppercase+"()":
                     # print("B")
                     if detectparen:
                         # print("C" + str(current_symbol))
