@@ -58,6 +58,21 @@ class Atom(object):
             return " ".join([feconfig(Lookup.symbol[config[0]])] + list(config[1:]))
             
         return feconfig(self)
+    
+    def __add__(self, other):
+        if isinstance(other, Element):
+            return Formula([self, other])
+        elif isinstance(other, Formula):
+            if other.count == 1:
+                return Formula([self] + other.symbols)
+            
+            return Formula([self, other])
+        
+        raise TypeError("Cannot add " + type(self) + " and " + type(other))
+    
+    def __mul__(self, other):
+        if isinstance(other, int):
+            return Formula([self], other)
             
 Element.register(Atom)
 
@@ -368,3 +383,11 @@ class Formula(object):
             counts[atom] *= 100/total
 
         return counts
+
+    def __mul__(self, count):
+        if isinstance(count, int):
+            return Formula(self.symbols, count * self.count)
+    
+    def __add__(self, other):
+        if isinstance(other, Formula):
+            return Formula([self,other])
