@@ -406,4 +406,3 @@ class Formula(object):
             
         raise TypeError("Cannot multiply Formula and " + str(type(count)))
 
-k
