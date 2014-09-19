@@ -387,6 +387,8 @@ class Formula(object):
     def __mul__(self, count):
         if isinstance(count, int):
             return Formula(self.symbols, count * self.count)
+            
+        raise TypeError("Cannot multiply Formula and " + str(type(other)))
     
     def __rmul__(self, count):
         if isinstance(count, int):
@@ -395,7 +397,13 @@ class Formula(object):
     def __add__(self, other):
         if isinstance(other, Formula):
             return Formula([self,other])
-        
+            
+        raise TypeError("Cannot add Formula and " + str(type(count)))
+
     def __radd__(self, other):
         if isinstance(other, Formula):
             return Formula([self,other])
+            
+        raise TypeError("Cannot multiply Formula and " + str(type(count)))
+
+k
