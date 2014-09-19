@@ -388,6 +388,14 @@ class Formula(object):
         if isinstance(count, int):
             return Formula(self.symbols, count * self.count)
     
+    def __rmul__(self, count):
+        if isinstance(count, int):
+            return Formula(self.symbols, count * self.count)
+    
     def __add__(self, other):
+        if isinstance(other, Formula):
+            return Formula([self,other])
+        
+    def __radd__(self, other):
         if isinstance(other, Formula):
             return Formula([self,other])
