@@ -395,14 +395,15 @@ class Formula(object):
             return Formula(self.symbols, count * self.count)
     
     def __add__(self, other):
-        if isinstance(other, Formula):
+        if isinstance(other, (Formula, Element)):
             return Formula([self,other])
-            
+
         raise TypeError("Cannot add Formula and " + str(type(count)))
 
     def __radd__(self, other):
-        if isinstance(other, Formula):
-            return Formula([self,other])
-            
+        if isinstance(other, (Formula, Element)):
+            return Formula([other, self])
+        
+            return Formula([oth])
         raise TypeError("Cannot multiply Formula and " + str(type(count)))
 
