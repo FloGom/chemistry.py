@@ -347,7 +347,7 @@ class Formula(object):
     def family(self):
         return self._map_collect("family")
         
-    @property    
+    @property
     def electron_config(self):
         return self._map_collect("electron_config")
         
@@ -363,7 +363,7 @@ class Formula(object):
             if hasattr(symbol, "counts"):
                 atoms = symbol.counts
                 for item in atoms:
-                    counts[item] += atoms[item] 
+                    counts[item] += atoms[item]
             else:
                 counts[symbol] += 1
                 
