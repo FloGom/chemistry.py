@@ -407,3 +407,5 @@ class Formula(object):
             return Formula([oth])
         raise TypeError("Cannot multiply Formula and " + str(type(count)))
 
+Fm = Formula
+
