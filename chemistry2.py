@@ -4,8 +4,8 @@ import string
 from functools import reduce
 import functools
 
-class Element(metaclass=abc.ABCMeta):
-    pass
+class Element():
+    __metaclass__=abc.ABCMeta
 
 class Atom(object):
     def __init__(self, options, **kwargs):
