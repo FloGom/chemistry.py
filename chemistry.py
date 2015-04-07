@@ -30,24 +30,24 @@ class Atom(object):
         }
 
         props.update(kwargs)
-        
+
         for prop in options:
             if prop not in props:
                 raise AttributeError("Unknown property " + str(prop))
-        
+
         for prop in props:
             if prop in options:
                 setattr(self, prop, props[prop](options[prop]))
             else:
                 setattr(self, prop, None)
-                
+
         # more properties to come
-    
+
     def __repr__(self):
         return self.symbol
 
     __str__ = __repr__
-    
+
     @property
     def electron_config_full(self):
         def feconfig(atom):
@@ -56,31 +56,31 @@ class Atom(object):
             if len(config) == 1:
                 return config[0]
             return " ".join([feconfig(Lookup.symbol[config[0]])] + list(config[1:]))
-            
+
         return feconfig(self)
-    
+
     def __add__(self, other):
         if isinstance(other, Element):
             return Formula([self, other])
         elif isinstance(other, Formula):
             if other.count == 1:
                 return Formula([self] + other.symbols)
-            
+
             return Formula([self, other])
-        
+
         raise TypeError("Cannot add " + type(self) + " and " + type(other))
-    
+
     def __mul__(self, other):
         if isinstance(other, int):
             return Formula([self], other)
-            
+
 Element.register(Atom)
 
 class Lookup(object):
     number = {}
     name   = {}
     symbol = {}
-    
+
     @classmethod
     def lookup(self, item):
         if item in self.number:
@@ -89,7 +89,7 @@ class Lookup(object):
             return self.name[item]
         elif item in self.symbol:
             return self.symbol[item]
-        
+
         raise ValueError("No such element "+str(item))
 
 
@@ -145,7 +145,7 @@ class Formula(object):
         self.count   = int(count)
         self.charge  = int(charge)
         self.symbols = []
-        
+
         if isinstance(symbols, str):
             current_symbol = []
             openparens = 0
@@ -153,36 +153,29 @@ class Formula(object):
             multiplier = ""
             for char in symbols+"Q":
                 if char == "(":
-                    # print("opening")
                     detectparen = True
                     openparens += 1
                     if current_symbol != []:
-                        # print("D" + str(current_symbol))
                         if multiplier == "":
                             self.symbols.append(Lookup.lookup("".join(current_symbol)))
                         else:
                             multiplier = int(multiplier)
                             sym = Formula("".join(current_symbol), multiplier)
                             self.symbols.append(sym)
-                           
+
                     current_symbol = []
                     multiplier = ""
                     continue
 
                 elif char == ")":
-                    # print("closing")
                     openparens -= 1
                     continue
-                    
-                # print("A"+char)
+
                 if char in string.digits and openparens == 0:
-                    # print("digit")
                     multiplier += char
-                   
+
                 elif openparens == 0 and char in string.ascii_uppercase+"()":
-                    # print("B")
                     if detectparen:
-                        # print("C" + str(current_symbol))
                         if multiplier == "":
                             multiplier = 1
                         self.symbols.append(Formula("".join(current_symbol),multiplier))
@@ -191,7 +184,6 @@ class Formula(object):
                         multiplier == ""
 
                     elif current_symbol != []:
-                        # print("D" + str(current_symbol))
                         if multiplier == "":
                             self.symbols.append(Lookup.lookup("".join(current_symbol)))
                         else:
@@ -204,34 +196,33 @@ class Formula(object):
 
                 elif char in string.ascii_letters+string.digits:
                     current_symbol.append(char)
-                        
-            # print("pop")
-                        
+
+
         elif isinstance(symbols, collections.Iterable):
             for symbol in symbols:
                 if isinstance(symbol, (Element,Formula)):
                     self.symbols.append(symbol)
                 else:
                     self.symbols.append(Lookup.lookup(symbol))
-    
+
     def __str__(self):
         string = []
         for symbol in self.symbols:
             string.append(str(symbol))
-        
+
         if self.count != 1:
             if len(self.symbols) > 1:
                 string = ["("] + string + [")"]
             string += [str(self.count)]
-            
+
         if self.charge != 0:
             if self.charge < 0:
                 string += ["(" + str(self.charge) + "-)"]
             else:
                 string += ["(" + str(self.charge) + "+)"]
-            
+
         return "".join(string)
-        
+
     __repr__ = __str__
 
     def _map(self, property, *args, **kwargs):
@@ -242,7 +233,7 @@ class Formula(object):
                 results.append(getattr(symbol,property+"_")(*args, **kwargs))
             else:
                 results.append(attr)
-                
+
         return results
 
     def _collect(self):
@@ -260,7 +251,7 @@ class Formula(object):
         for atom in self._collect():
             result[atom] = getattr(atom, property)
         return result
-        
+
     def masses(self, **kwargs):
         if "map" in kwargs and not kwargs["map"]:
             mass = reduce(lambda x,y:x+y, self._map("mass", **kwargs))
@@ -269,9 +260,9 @@ class Formula(object):
         masses = {}
         for atom in self._collect():
             masses[atom] = atom.mass
-            
+
         return masses
-        
+
     def exact_masses(self, **kwargs):
         if "map" in kwargs and not kwargs["map"]:
             mass = reduce(lambda x,y:x+y, self._map("exact_mass", **kwargs))
@@ -280,9 +271,9 @@ class Formula(object):
         masses = {}
         for atom in self._collect():
             masses[atom] = atom.exact_mass
-            
+
         return masses
-            
+
     @property
     def mass(self):
         return self.masses(map=False)
@@ -290,75 +281,75 @@ class Formula(object):
     @property
     def exact_mass(self):
         return self.exact_masses(map=False)
-        
+
     @property
     def number(self):
         return self._map_collect("number")
-        
-    @property    
+
+    @property
     def symbol(self):
         return self._map_collect("symbol")
-        
-    @property    
+
+    @property
     def name(self):
         return self._map_collect("name")
-        
-    @property    
+
+    @property
     def ionization(self):
         return self._map_collect("ionization")
-        
-    @property    
+
+    @property
     def electron_affinity(self):
         return self._map_collect("electron_affinity")
-        
-    @property    
+
+    @property
     def electronegativity(self):
         return self._map_collect("electronegativity")
-        
-    @property    
+
+    @property
     def radius_vdw(self):
         return self._map_collect("radius_vdw")
-        
-    @property    
+
+    @property
     def radius_covalent(self):
         return self._map_collect("radius_covalent")
-        
-    @property    
+
+    @property
     def boiling_point(self):
         return self._map_collect("boiling_point")
-        
-    @property    
+
+    @property
     def melting_point(self):
         return self._map_collect("melting_point")
-        
-    @property    
+
+    @property
     def block(self):
         return self._map_collect("block")
-        
+
     @property
     def period(self):
         return self._map_collect("period")
-        
+
     @property
     def group(self):
         return self._map_collect("group")
-        
-    @property    
+
+    @property
     def family(self):
         return self._map_collect("family")
-        
+
     @property
     def electron_config(self):
         return self._map_collect("electron_config")
-        
-    @property    
+
+    @property
     def electron_config_full(self):
         return self._map_collect("electron_config_full")
-    
-    @property    
+
+    @property
     def counts(self):
         counts = collections.defaultdict(lambda: 0)
-        
+
         for symbol in self.symbols:
             if hasattr(symbol, "counts"):
                 atoms = symbol.counts
@@ -366,13 +357,13 @@ class Formula(object):
                     counts[item] += atoms[item]
             else:
                 counts[symbol] += 1
-                
+
         for item in counts:
             counts[item] *= self.count
 
         return dict(counts)
-        
-    @property    
+
+    @property
     def mass_composition(self):
         counts = self.counts
         for atom in counts:
@@ -387,13 +378,13 @@ class Formula(object):
     def __mul__(self, count):
         if isinstance(count, int):
             return Formula(self.symbols, count * self.count)
-            
+
         raise TypeError("Cannot multiply Formula and " + str(type(count)))
     
     def __rmul__(self, count):
         if isinstance(count, int):
             return Formula(self.symbols, count * self.count)
-    
+
     def __add__(self, other):
         if isinstance(other, (Formula, Element)):
             return Formula([self,other])
@@ -403,8 +394,7 @@ class Formula(object):
     def __radd__(self, other):
         if isinstance(other, (Formula, Element)):
             return Formula([other, self])
-        
+
         raise TypeError("Cannot multiply Formula and " + str(type(other)))
 
 Fm = Formula
-
