@@ -74,6 +74,10 @@ class Atom(object):
         if isinstance(other, int):
             return Formula([self], other)
 
+    def __rmul__(self, other):
+        if isinstance(other, int):
+            return Formula([self], other)
+
 Element.register(Atom)
 
 class Lookup(object):
@@ -380,7 +384,7 @@ class Formula(object):
             return Formula(self.symbols, count * self.count)
 
         raise TypeError("Cannot multiply Formula and " + str(type(count)))
-    
+
     def __rmul__(self, count):
         if isinstance(count, int):
             return Formula(self.symbols, count * self.count)
