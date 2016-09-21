@@ -1,6 +1,7 @@
 chemistry.py
 ============
 
+Forked from [https://github.com/PythonNut/chemistry.py](PythonNut/chemistry.py)
 A module that adds symbolic chemistry to Python/SAGEmath. Major WIP.
 
 ```
